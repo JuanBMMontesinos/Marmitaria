@@ -1,0 +1,46 @@
+# Built application files
+**/build/
+**/bin/
+**/out/
+
+# Gradle files
+**/.gradle/
+.gradle/
+build/
+
+# Local configuration file (sdk path, etc)
+local.properties
+
+# Android Studio / IntelliJ IDEA
+**/.idea/
+.idea/
+*.iml
+*.iws
+*.ipr
+.idea/caches/
+.idea/libraries/
+.idea/modules.xml
+.idea/workspace.xml
+
+# Keystore files
+*.jks
+*.keystore
+
+# Google Services (se for adicionado no futuro com credenciais privadas)
+google-services.json
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Backup and temporary files
+Cardápio.zip
+*.tmp
+*.bak
+*.swp
+*~

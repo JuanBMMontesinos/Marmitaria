@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    
+    <!-- SEO & Metadata -->
+    <title>Marmitaria do Dia - Pedidos Online</title>
+    <meta name="description" content="Peça o marmitex mais saboroso do dia direto do seu celular! Entrega rápida sem taxas adicionais. Faça seu pedido agora!">
+    <meta name="theme-color" content="#120905">
+    
+    <!-- PWA capability tags -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    
+    <!-- CSS styles link -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- Confetti falling canvas container -->
+    <div id="confetti-container" class="confetti-holder"></div>
+
+    <!-- Main Mobile Framework Shell -->
+    <div class="app-container">
+        
+        <!-- Subtle wood grain overlay on background -->
+        <div class="wood-pattern-overlay"></div>
+
+        <!-- Hidden Developer Admin Panel Access -->
+        <div class="admin-badge" onclick="openAdminOrders()">Ver Área Admin</div>
+
+        <!-- HEADER SECTION -->
+        <header>
+            <div class="logo-container">
+                <h1 class="logo-title">Cardápio</h1>
+                <span class="logo-sub">do Dia</span>
+            </div>
+            <br>
+            <span class="delivery-badge">Somente Delivery / Entrega</span>
+        </header>
+
+        <!-- Sunday closed warning banner -->
+        <div id="closed-warning" style="display:none; background: #e53935; color: white; text-align: center; padding: 12px; font-weight: 700; font-size: 13px; font-family: 'Oswald', sans-serif; letter-spacing: 0.5px; border-bottom: 2px solid #b71c1c;">
+            📢 ESTAMOS FECHADOS HOJE (DOMINGO)<br>
+            <span style="font-weight: 400; font-size: 11px; font-family: sans-serif;">Consulte abaixo o menu de Segunda-feira e agende seu pedido!</span>
+        </div>
+
+        <!-- SCREEN 1: MENU AND ORDERING (Default view) -->
+        <div id="menu-screen" class="view-screen active-screen">
+            
+            <!-- Weekday Horizontal Carousel Selector -->
+            <div class="day-selector-wrapper">
+                <div id="day-selector-scroll" class="day-selector-scroll">
+                    <!-- Dynamic rendering by app.js -->
+                </div>
+            </div>
+
+            <!-- Meals options layout -->
+            <section class="menu-section">
+                <div class="section-header">
+                    <h2 class="section-title" id="selected-day-title">Segunda-feira</h2>
+                    <span class="salad-notice-badge">Acompanha Salada</span>
+                </div>
+                
+                <div id="menu-grid" class="food-grid">
+                    <!-- Dynamic card options 1 to 6 injected by app.js -->
+                </div>
+            </section>
+
+            <!-- Beverages options layout -->
+            <section class="drinks-section">
+                <div class="section-header">
+                    <h2 class="section-title">Opções de Bebidas</h2>
+                </div>
+                <div id="drinks-grid" class="drinks-grid">
+                    <!-- Dynamic beverages list injected by app.js -->
+                </div>
+            </section>
+        </div>
+
+        <!-- SCREEN 2: ACTIVE ORDER TRACKING (Simulated status screen) -->
+        <div id="order-screen" class="view-screen">
+            <div style="padding: 24px 20px;">
+                <div class="order-tracking-card">
+                    <div class="tracking-header">
+                        <div class="status-icon-circle">
+                            <!-- Bouncing Cooking icon -->
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                        </div>
+                        <h2 class="tracking-title" id="tracking-status-text">Pedido Confirmado!</h2>
+                        <p style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">Seu pedido está sendo processado.</p>
+                    </div>
+
+                    <!-- Tracking Process timeline -->
+                    <div class="tracking-timeline" id="order-timeline">
+                        <div class="timeline-step active">
+                            <span class="timeline-title">Recebido e Confirmado</span>
+                            <span class="timeline-time" id="time-step-0">--:--</span>
+                        </div>
+                        <div class="timeline-step">
+                            <span class="timeline-title">Na Cozinha (Preparando)</span>
+                            <span class="timeline-time" id="time-step-1">--:--</span>
+                        </div>
+                        <div class="timeline-step">
+                            <span class="timeline-title">Saiu para Entrega / Balcão</span>
+                            <span class="timeline-time" id="time-step-2">--:--</span>
+                        </div>
+                        <div class="timeline-step">
+                            <span class="timeline-title">Entregue (Bom Apetite!)</span>
+                            <span class="timeline-time" id="time-step-3">--:--</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- WhatsApp Disparador Button -->
+                <div style="margin-top: 24px; text-align: center;">
+                    <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 12px; line-height: 1.4;">
+                        ⚠️ <b>IMPORTANTE:</b> Envie o seu pedido pelo WhatsApp abaixo para oficializar a produção na nossa cozinha!
+                    </p>
+                    <button class="confirm-action-btn" onclick="sendWhatsAppOrder()" style="background: linear-gradient(135deg, #25d366, #128c7e); color: white;">
+                        <!-- WhatsApp SVG icon -->
+                        <svg style="width: 20px; height: 20px; fill: currentColor;" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.514 2.266 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.724-1.455L0 24zm6.59-4.846c1.6.95 3.188 1.449 4.725 1.451 5.486 0 9.95-4.46 9.954-9.94.002-2.654-1.033-5.148-2.908-7.025C16.543 1.764 14.053.727 11.4.727 5.917.727 1.456 5.184 1.452 10.665c-.001 1.624.453 3.208 1.311 4.6l-.378 1.385-.369 1.35 2.766-.725.334.204zm12.183-6.195c-.3-.15-1.77-.875-2.045-.975-.275-.1-.475-.15-.675.15-.2.3-.775.975-.95 1.175-.175.2-.35.225-.65.075-.3-.15-1.265-.467-2.41-1.485-.89-.79-1.49-1.77-1.665-2.07-.175-.3-.02-.46.13-.61.135-.135.3-.35.45-.525.15-.175.2-.3.3-.5.1-.2.05-.375-.025-.525-.075-.15-.675-1.625-.925-2.225-.244-.589-.496-.51-.675-.52-.175-.01-.375-.01-.575-.01-.2 0-.525.075-.8.375-.275.3-1.05 1.025-1.05 2.5 0 1.475 1.075 2.9 1.225 3.1.15.2 2.11 3.22 5.116 4.52.716.31 1.275.495 1.71.635.72.23 1.375.197 1.89.12.575-.085 1.77-.725 2.02-1.39.25-.665.25-1.235.175-1.39-.075-.155-.275-.255-.575-.405z"/></svg>
+                        Enviar pelo WhatsApp
+                    </button>
+                    
+                    <button class="add-btn" onclick="switchScreen('menu-screen')" style="margin: 20px auto 0 auto; background: none; border-color: rgba(255,255,255,0.1); color: var(--text-muted);">
+                        Voltar para o Cardápio
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- FIXED BOTTOM NAVIGATION BAR -->
+        <nav class="bottom-nav">
+            <button class="nav-item active" id="nav-menu" onclick="switchScreen('menu-screen')">
+                <svg viewBox="0 0 24 24"><path d="M12 2L2 22h20L12 2zm0 3.99L19.53 19H4.47L12 5.99z"/></svg>
+                Cardápio
+            </button>
+            <button class="nav-item cart-nav-btn" id="nav-cart" onclick="openOverlay('cart-drawer-overlay'); renderCartDrawer();">
+                <svg viewBox="0 0 24 24"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+                Carrinho
+                <span class="cart-badge" style="display:none;">0</span>
+            </button>
+            <button class="nav-item" id="nav-orders" onclick="switchScreen('order-screen')">
+                <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                Rastreador
+            </button>
+        </nav>
+
+        <!-- FLOATING DIRECT WHATSAPP SHORTCUT -->
+        <div class="whatsapp-float" onclick="window.open('https://api.whatsapp.com/send?phone=' + WHATSAPP_PHONE, '_blank')">
+            <svg viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.514 2.266 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.724-1.455L0 24zm6.59-4.846c1.6.95 3.188 1.449 4.725 1.451 5.486 0 9.95-4.46 9.954-9.94.002-2.654-1.033-5.148-2.908-7.025C16.543 1.764 14.053.727 11.4.727 5.917.727 1.456 5.184 1.452 10.665c-.001 1.624.453 3.208 1.311 4.6l-.378 1.385-.369 1.35 2.766-.725.334.204zm12.183-6.195c-.3-.15-1.77-.875-2.045-.975-.275-.1-.475-.15-.675.15-.2.3-.775.975-.95 1.175-.175.2-.35.225-.65.075-.3-.15-1.265-.467-2.41-1.485-.89-.79-1.49-1.77-1.665-2.07-.175-.3-.02-.46.13-.61.135-.135.3-.35.45-.525.15-.175.2-.3.3-.5.1-.2.05-.375-.025-.525-.075-.15-.675-1.625-.925-2.225-.244-.589-.496-.51-.675-.52-.175-.01-.375-.01-.575-.01-.2 0-.525.075-.8.375-.275.3-1.05 1.025-1.05 2.5 0 1.475 1.075 2.9 1.225 3.1.15.2 2.11 3.22 5.116 4.52.716.31 1.275.495 1.71.635.72.23 1.375.197 1.89.12.575-.085 1.77-.725 2.02-1.39.25-.665.25-1.235.175-1.39-.075-.155-.275-.255-.575-.405z"/></svg>
+        </div>
+    </div>
+
+    <!-- TOAST ALERT PANEL -->
+    <div id="toast-notification" class="toast-msg">
+        <svg style="width:20px;height:20px" viewBox="0 0 24 24"><path fill="currentColor" d="M12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22A10,10 0 0,1 2,12A10,10 0 0,1 12,2M12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20A8,8 0 0,0 20,12A8,8 0 0,0 12,4M11,17H13V15H11V17M11,13H13V7H11V13Z"/></svg>
+        <span id="toast-text">Marmita adicionada!</span>
+    </div>
+
+    <!-- ==========================================================================
+       MODALS & DRAWER PORTALS (OVERLAYS)
+       ========================================================================== -->
+
+    <!-- OVERLAY 1: ITEM CUSTOMIZATION BOTTOM SHEET -->
+    <div id="cust-sheet-overlay" class="overlay">
+        <div class="bottom-sheet">
+            <div class="sheet-header">
+                <div class="sheet-title-area">
+                    <span id="cust-num" style="font-size:11px; font-weight:700; color:var(--primary); text-transform:uppercase;">Opção</span>
+                    <h3 id="cust-title" class="logo-title" style="font-size:22px; line-height:1.2;">Marmita Especial</h3>
+                    <div id="cust-total-price" class="customize-price">R$ 27,00</div>
+                </div>
+                <button class="sheet-close" onclick="closeOverlay('cust-sheet-overlay')">✕</button>
+            </div>
+            
+            <p id="cust-accompaniments" style="font-size: 13px; color: var(--text-muted); margin-bottom: 20px;">Acompanhamentos...</p>
+
+            <!-- Preferences inputs -->
+            <div class="custom-section-title">Observações do Pedido</div>
+            <div class="form-group pref-input-wrapper">
+                <label class="pref-label" for="cust-pref-text">Deseja retirar algum ingrediente? (Ex: sem arroz, feijão separado, sem cebola)</label>
+                <textarea id="cust-pref-text" class="custom-textarea" rows="3" placeholder="Digite suas observações aqui..."></textarea>
+            </div>
+
+            <!-- Marmita Additional options -->
+            <div class="custom-section-title">Adicionais Extras</div>
+            <div style="display:flex; flex-direction:column; gap:10px; margin-bottom: 10px;">
+                <label style="display:flex; align-items:center; justify-content:between; background:rgba(255,255,255,0.02); padding:10px; border-radius:8px; border:1px solid rgba(255,255,255,0.05); cursor:pointer;">
+                    <div style="display:flex; align-items:center; gap:10px;">
+                        <input type="checkbox" class="addon-checkbox" onchange="toggleAddon(this, 'Ovo Frito', 3.00)" style="accent-color:var(--primary);">
+                        <span style="font-size:13px; font-weight:600;">Ovo Frito extra</span>
+                    </div>
+                    <span style="font-size:13px; color:var(--text-gold); font-weight:700; margin-left:auto;">+ R$ 3,00</span>
+                </label>
+                
+                <label style="display:flex; align-items:center; justify-content:between; background:rgba(255,255,255,0.02); padding:10px; border-radius:8px; border:1px solid rgba(255,255,255,0.05); cursor:pointer;">
+                    <div style="display:flex; align-items:center; gap:10px;">
+                        <input type="checkbox" class="addon-checkbox" onchange="toggleAddon(this, 'Batata Palha extra', 2.00)" style="accent-color:var(--primary);">
+                        <span style="font-size:13px; font-weight:600;">Batata Palha extra</span>
+                    </div>
+                    <span style="font-size:13px; color:var(--text-gold); font-weight:700; margin-left:auto;">+ R$ 2,00</span>
+                </label>
+
+                <label style="display:flex; align-items:center; justify-content:between; background:rgba(255,255,255,0.02); padding:10px; border-radius:8px; border:1px solid rgba(255,255,255,0.05); cursor:pointer;">
+                    <div style="display:flex; align-items:center; gap:10px;">
+                        <input type="checkbox" class="addon-checkbox" onchange="toggleAddon(this, 'Farofa extra', 2.00)" style="accent-color:var(--primary);">
+                        <span style="font-size:13px; font-weight:600;">Farofa extra</span>
+                    </div>
+                    <span style="font-size:13px; color:var(--text-gold); font-weight:700; margin-left:auto;">+ R$ 2,00</span>
+                </label>
+            </div>
+
+            <!-- Opções de inclusão de Bebidas na Marmita -->
+            <div class="custom-section-title">Incluir Bebida (Opcional)</div>
+            <div style="display:flex; flex-direction:column; gap:10px; margin-bottom: 10px;">
+                <label style="display:flex; align-items:center; justify-content:between; background:rgba(255,255,255,0.02); padding:10px; border-radius:8px; border:1px solid rgba(255,255,255,0.05); cursor:pointer;">
+                    <div style="display:flex; align-items:center; gap:10px;">
+                        <input type="checkbox" class="addon-checkbox" onchange="toggleAddon(this, 'Refrigerante Lata 350ml', 6.00)" style="accent-color:var(--primary);">
+                        <span style="font-size:13px; font-weight:600;">Refrigerante Lata 350ml</span>
+                    </div>
+                    <span style="font-size:13px; color:var(--text-gold); font-weight:700; margin-left:auto;">+ R$ 6,00</span>
+                </label>
+                
+                <label style="display:flex; align-items:center; justify-content:between; background:rgba(255,255,255,0.02); padding:10px; border-radius:8px; border:1px solid rgba(255,255,255,0.05); cursor:pointer;">
+                    <div style="display:flex; align-items:center; gap:10px;">
+                        <input type="checkbox" class="addon-checkbox" onchange="toggleAddon(this, 'Mini Refrigerante 200ml', 3.00)" style="accent-color:var(--primary);">
+                        <span style="font-size:13px; font-weight:600;">Mini Refrigerante 200ml</span>
+                    </div>
+                    <span style="font-size:13px; color:var(--text-gold); font-weight:700; margin-left:auto;">+ R$ 3,00</span>
+                </label>
+            </div>
+
+            <!-- Quantity Selector & Add Button -->
+            <div style="display:flex; align-items:center; justify-content:between; margin-top:20px; gap:20px; border-top:1px solid rgba(255,152,0,0.15); padding-top:16px;">
+                <div class="quantity-control">
+                    <button class="qty-btn" onclick="adjustQty(-1)">-</button>
+                    <span id="cust-qty" class="qty-val">1</span>
+                    <button class="qty-btn" onclick="adjustQty(1)">+</button>
+                </div>
+                
+                <button class="confirm-action-btn" onclick="confirmCustomize()" style="flex:1;">
+                    Confirmar e Adicionar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- OVERLAY 2: SHOPPING CART DRAWER -->
+    <div id="cart-drawer-overlay" class="overlay">
+        <div class="drawer">
+            <div class="drawer-header">
+                <h3 class="drawer-title">
+                    <svg style="width:22px;height:22px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+                    Seu Carrinho
+                </h3>
+                <button class="sheet-close" onclick="closeOverlay('cart-drawer-overlay')">✕</button>
+            </div>
+
+            <div class="drawer-body">
+                <!-- Cart items list dynamically rendered by JS -->
+                <div id="cart-items-list" class="cart-list"></div>
+                
+                <!-- Empty state visual -->
+                <div id="cart-empty-state" class="cart-empty-state">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5-2 4-2 4 2 4 2M9 9h.01M15 9h.01"/></svg>
+                    <h3>Seu carrinho está vazio!</h3>
+                    <p style="font-size:12px; color:var(--text-muted); margin-top:8px;">Volte ao cardápio e adicione marmitas fresquinhas para o almoço.</p>
+                </div>
+            </div>
+
+            <!-- Footer summary area -->
+            <div class="drawer-footer" id="cart-drawer-footer">
+                <div class="summary-row">
+                    <span>Subtotal</span>
+                    <span id="cart-subtotal">R$ 0,00</span>
+                </div>
+                <div class="summary-row">
+                    <span>Taxa de Entrega</span>
+                    <span style="color:#4caf50; font-weight:700;">Grátis</span>
+                </div>
+                <div class="summary-row total">
+                    <span>Total do Pedido</span>
+                    <span id="cart-total" class="price-val">R$ 0,00</span>
+                </div>
+                <div style="display:grid; grid-template-columns: 1fr 2fr; gap:10px; margin-top:10px;">
+                    <button class="add-btn" onclick="clearCart()" style="border-color:#ff5252; color:#ff5252; background:rgba(255,82,82,0.05); justify-content:center;">
+                        Limpar
+                    </button>
+                    <button class="confirm-action-btn" onclick="proceedToCheckout()">
+                        Avançar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- OVERLAY 3: CHECKOUT DETAILS & ADDRESS DRAWER -->
+    <div id="checkout-drawer-overlay" class="overlay">
+        <div class="drawer">
+            <div class="drawer-header">
+                <h3 class="drawer-title">Finalizar Pedido</h3>
+                <button class="sheet-close" onclick="closeOverlay('checkout-drawer-overlay')">✕</button>
+            </div>
+
+            <div class="drawer-body">
+                <form id="checkout-form" style="display:flex; flex-direction:column; gap:15px; height:100%;">
+                    
+                    <!-- Toggle Entrega vs Retirada -->
+                    <div class="toggle-group">
+                        <button type="button" class="toggle-btn active" id="toggle-delivery" onclick="toggleDeliveryFields('delivery')">Entrega</button>
+                        <button type="button" class="toggle-btn" id="toggle-takeout" onclick="toggleDeliveryFields('takeout')">Retirada no Balcão</button>
+                    </div>
+
+                    <!-- Client Personal Details -->
+                    <div class="custom-section-title" style="margin-top:0;">Seus Dados</div>
+                    <div class="form-group">
+                        <label class="form-label" for="chk-name">Seu Nome *</label>
+                        <input type="text" id="chk-name" class="form-control" placeholder="Ex: João da Silva" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="chk-phone">WhatsApp para Contato *</label>
+                        <input type="tel" id="chk-phone" class="form-control" placeholder="Ex: (11) 99999-9999" required>
+                    </div>
+
+                    <!-- Delivery Address Section -->
+                    <div id="address-fields-container">
+                        <div class="custom-section-title">Endereço de Entrega</div>
+                        
+                        <div class="form-row-2">
+                            <div class="form-group">
+                                <label class="form-label" for="chk-cep">CEP *</label>
+                                <input type="text" id="chk-cep" class="form-control" placeholder="Ex: 01234-567">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="chk-neighborhood">Bairro *</label>
+                                <input type="text" id="chk-neighborhood" class="form-control" placeholder="Ex: Centro">
+                            </div>
+                        </div>
+                        
+                        <div class="form-row-3">
+                            <div class="form-group">
+                                <label class="form-label" for="chk-street">Rua *</label>
+                                <input type="text" id="chk-street" class="form-control" placeholder="Ex: Av. Brasil">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="chk-num">Nº *</label>
+                                <input type="text" id="chk-num" class="form-control" placeholder="Ex: 123">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="chk-complement">Comp.</label>
+                                <input type="text" id="chk-complement" class="form-control" placeholder="Ex: Apto 1">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="chk-ref">Ponto de Referência</label>
+                            <input type="text" id="chk-ref" class="form-control" placeholder="Ex: Ao lado da padaria">
+                        </div>
+                    </div>
+
+                    <!-- Takeout static details -->
+                    <div id="takeout-notice" style="display:none; background:rgba(255,152,0,0.05); border:1px solid rgba(255,152,0,0.2); padding:15px; border-radius:10px; text-align:center;">
+                        <h4 style="color:var(--primary); margin-bottom:6px;">🏪 Retirada no Balcão</h4>
+                        <p style="font-size:12px; color:var(--text-muted); line-height:1.4;">
+                            Endereço: <b>Rua das Marmitas, 500 - Centro</b><br>
+                            Seu pedido estará disponível no balcão a partir das <b>11:30h</b>. Avisaremos via WhatsApp quando estiver embalado!
+                        </p>
+                    </div>
+
+                    <!-- Payment Selector details -->
+                    <div class="custom-section-title">Forma de Pagamento</div>
+                    <div class="payment-selector">
+                        <div class="pay-option active" id="pay-opt-pix" onclick="selectPaymentMethod('pix')">
+                            <div class="pay-radio"></div>
+                            <div class="pay-info">
+                                <span class="pay-title">PIX</span>
+                                <span class="pay-desc">Aprovação imediata, chaves geradas online</span>
+                            </div>
+                        </div>
+
+                        <div class="pay-option" id="pay-opt-card" onclick="selectPaymentMethod('card')">
+                            <div class="pay-radio"></div>
+                            <div class="pay-info">
+                                <span class="pay-title">Cartão de Crédito Online</span>
+                                <span class="pay-desc">Visa, Mastercard, Elo, Hipercard</span>
+                            </div>
+                        </div>
+
+                        <div class="pay-option" id="pay-opt-delivery-cash" onclick="selectPaymentMethod('delivery-cash')">
+                            <div class="pay-radio"></div>
+                            <div class="pay-info">
+                                <span class="pay-title">Dinheiro na Entrega</span>
+                                <span class="pay-desc">Pague na entrega com dinheiro físico</span>
+                            </div>
+                        </div>
+
+                        <div class="pay-option" id="pay-opt-delivery-card" onclick="selectPaymentMethod('delivery-card')">
+                            <div class="pay-radio"></div>
+                            <div class="pay-info">
+                                <span class="pay-title">Maquininha na Entrega</span>
+                                <span class="pay-desc">Crédito, Débito ou Ticket Refeição</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Card data visual container (Simulated) -->
+                    <div id="credit-card-container" style="display:none; padding:10px; background:rgba(0,0,0,0.15); border-radius:12px; margin-bottom:12px;">
+                        <div class="credit-card-preview">
+                            <div style="display:flex; justify-content:space-between; align-items:center;">
+                                <div class="card-chip"></div>
+                                <span style="font-family:'Oswald'; letter-spacing:1px; font-weight:700; font-size:12px;">CREDIT CARD</span>
+                            </div>
+                            <div class="card-num" id="card-preview-num">•••• •••• •••• ••••</div>
+                            <div class="card-row-bottom">
+                                <div>
+                                    <div style="font-size:7px; opacity:0.6;">Titular</div>
+                                    <div id="card-preview-owner">NOME DO TITULAR</div>
+                                </div>
+                                <div style="text-align:right;">
+                                    <div style="font-size:7px; opacity:0.6;">Validade</div>
+                                    <div>12/30</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" style="font-size:10px;">Número do Cartão *</label>
+                            <input type="text" id="card-number-input" class="form-control" placeholder="1234 5678 1234 5678" maxlength="19">
+                        </div>
+                        <div class="form-row-2">
+                            <div class="form-group">
+                                <label class="form-label" style="font-size:10px;">Nome no Cartão *</label>
+                                <input type="text" id="card-owner-input" class="form-control" placeholder="Nome Completo">
+                            </div>
+                            <div class="form-row-2">
+                                <div class="form-group">
+                                    <label class="form-label" style="font-size:10px;">Validade *</label>
+                                    <input type="text" class="form-control" placeholder="MM/AA" maxlength="5">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label" style="font-size:10px;">CVV *</label>
+                                    <input type="password" class="form-control" placeholder="123" maxlength="4">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Cash change calculator container -->
+                    <div id="cash-change-container" style="display:none; background:rgba(0,0,0,0.15); padding:12px; border-radius:10px; margin-bottom:12px;">
+                        <span class="form-label">Precisa de troco?</span>
+                        <div style="display:flex; gap:16px; margin: 8px 0;">
+                            <label style="display:flex; align-items:center; gap:6px; cursor:pointer;">
+                                <input type="radio" name="need-change" id="change-no" checked onclick="updateChangeRequired(false)" style="accent-color:var(--primary);">
+                                <span style="font-size:13px;">Não, valor exato</span>
+                            </label>
+                            <label style="display:flex; align-items:center; gap:6px; cursor:pointer;">
+                                <input type="radio" name="need-change" id="change-yes" onclick="updateChangeRequired(true)" style="accent-color:var(--primary);">
+                                <span style="font-size:13px;">Sim, preciso de troco</span>
+                            </label>
+                        </div>
+                        <div id="cash-change-input-group" style="display:none;" class="form-group m-t-20">
+                            <label class="form-label" for="chk-change-value">Troco para quanto?</label>
+                            <input type="number" id="chk-change-value" class="form-control" placeholder="Ex: R$ 50,00" step="0.01">
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Footer confirmation area -->
+            <div class="drawer-footer">
+                <div class="summary-row">
+                    <span>Subtotal</span>
+                    <span id="chk-subtotal-val">R$ 0,00</span>
+                </div>
+                <div class="summary-row">
+                    <span>Taxa de Entrega</span>
+                    <span style="color:#4caf50; font-weight:700;">Grátis</span>
+                </div>
+                <div class="summary-row total">
+                    <span>Total a Pagar</span>
+                    <span id="chk-total-val" class="price-val">R$ 0,00</span>
+                </div>
+                <button type="submit" form="checkout-form" class="confirm-action-btn" style="margin-top:10px;">
+                    Confirmar Pedido
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- OVERLAY 4: PIX QR CODE DIALOG POPUP -->
+    <div id="pix-modal-overlay" class="overlay" style="align-items:center;">
+        <div class="bottom-sheet" style="position:relative; width:90%; max-width:400px; border-radius:20px; border:2px solid var(--primary); padding:24px 20px;">
+            <div style="text-align:center;">
+                <h3 class="drawer-title" style="justify-content:center; color:var(--primary); font-size:22px; margin-bottom:4px;">📱 Pague com PIX</h3>
+                <p style="font-size:12px; color:var(--text-muted); margin-bottom:20px;">Escaneie o QR Code ou copie a chave Pix abaixo.</p>
+                
+                <!-- Gorgeous simulated QR code visual container -->
+                <div style="position:relative; width:180px; height:180px; margin: 0 auto 20px auto; background:white; padding:10px; border-radius:12px; box-shadow:var(--shadow-md); display:flex; align-items:center; justify-content:center;">
+                    <!-- Pure CSS beautifully simulated high-fidelity QR Code look -->
+                    <div style="width:160px; height:160px; background-image: radial-gradient(circle, #000 20%, transparent 20%), radial-gradient(circle, #000 20%, transparent 20%), linear-gradient(45deg, #000 25%, transparent 25%, transparent 75%, #000 75%, #000), linear-gradient(45deg, #000 25%, transparent 25%, transparent 75%, #000 75%, #000); background-size:10px 10px, 10px 10px, 20px 20px, 20px 20px; background-position:0 0, 5px 5px, 0 0, 10px 10px; opacity:0.85;"></div>
+                    <!-- Mock central logo for professional branding look -->
+                    <div style="position:absolute; width:44px; height:44px; background:var(--bg-primary); border-radius:8px; border:2px solid white; display:flex; align-items:center; justify-content:center; color:var(--primary); font-family:'Oswald'; font-size:10px; font-weight:700;">PIX</div>
+                </div>
+
+                <div class="form-group" style="text-align:left;">
+                    <label class="form-label" style="font-size:10px; text-align:center; display:block;">Chave PIX (WhatsApp Oficial)</label>
+                    <div style="display:flex; gap:8px;">
+                        <input type="text" class="form-control" id="pix-key-str" value="11970599173" readonly style="text-align:center; font-weight:700; color:var(--text-gold); font-size:15px; border-color:var(--text-gold);">
+                        <button class="add-btn" onclick="navigator.clipboard.writeText('11970599173'); showToast('Chave PIX copiada!');" style="padding:0 12px; background:rgba(255, 179, 0, 0.1); border-color:var(--text-gold); color:var(--text-gold);">
+                            Copiar
+                        </button>
+                    </div>
+                </div>
+
+                <p style="font-size:11px; color:var(--text-muted); margin: 16px 0 20px 0; line-height:1.4;">
+                    Após efetuar a transferência no app do seu banco, clique em confirmar abaixo para liberar seu rastreamento e gerar a mensagem.
+                </p>
+
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+                    <button class="add-btn" onclick="closeOverlay('pix-modal-overlay'); openOverlay('checkout-drawer-overlay');" style="border-color:rgba(255,255,255,0.1); color:var(--text-muted); justify-content:center;">
+                        Voltar
+                    </button>
+                    <button class="confirm-action-btn" onclick="finalizeOrder('pix')">
+                        Pago!
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JS app link -->
+    <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,203 @@
+package com.marmitaria.marmitaria_do_dia.ui.screens
+
+import android.widget.Toast
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Assignment
+import androidx.compose.material.icons.filled.RestaurantMenu
+import androidx.compose.material.icons.filled.ShoppingCart
+import androidx.compose.material3.Badge
+import androidx.compose.material3.BadgedBox
+import androidx.compose.material3.Icon
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.NavigationBarItemDefaults
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.marmitaria.marmitaria_do_dia.ui.theme.BgGlass
+import com.marmitaria.marmitaria_do_dia.ui.theme.BgPrimary
+import com.marmitaria.marmitaria_do_dia.ui.theme.BgSecondary
+import com.marmitaria.marmitaria_do_dia.ui.theme.BorderOrange
+import com.marmitaria.marmitaria_do_dia.ui.theme.ErrorRed
+import com.marmitaria.marmitaria_do_dia.ui.theme.PrimaryOrange
+import com.marmitaria.marmitaria_do_dia.ui.theme.TextDark
+import com.marmitaria.marmitaria_do_dia.ui.theme.TextGold
+import com.marmitaria.marmitaria_do_dia.ui.theme.TextMuted
+import com.marmitaria.marmitaria_do_dia.ui.theme.TextWhite
+import com.marmitaria.marmitaria_do_dia.ui.viewmodel.MenuViewModel
+
+@Composable
+fun MainScreen(
+    viewModel: MenuViewModel = viewModel()
+) {
+    val uiState by viewModel.uiState.collectAsState()
+    val context = LocalContext.current
+
+    // Exibição de Toasts reativos
+    LaunchedEffect(uiState.toastMessage) {
+        uiState.toastMessage?.let { msg ->
+            Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
+            viewModel.clearToast()
+        }
+    }
+
+    Scaffold(
+        containerColor = BgPrimary,
+        topBar = {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(BgSecondary)
+                    .padding(top = 16.dp, bottom = 12.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Row(
+                    verticalAlignment = Alignment.Bottom,
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    Text(
+                        text = "Cardápio",
+                        color = TextWhite,
+                        fontSize = 24.sp,
+                        fontWeight = FontWeight.Bold,
+                        letterSpacing = 1.sp
+                    )
+                    Text(
+                        text = " do Dia",
+                        color = TextGold,
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Bold,
+                        fontStyle = androidx.compose.ui.text.font.FontStyle.Italic,
+                        modifier = Modifier.padding(start = 4.dp)
+                    )
+                }
+
+                Box(
+                    modifier = Modifier
+                        .padding(top = 4.dp)
+                        .clip(RoundedCornerShape(20.dp))
+                        .background(BgGlass)
+                        .border(1.dp, BorderOrange, RoundedCornerShape(20.dp))
+                        .padding(horizontal = 12.dp, vertical = 2.dp)
+                ) {
+                    Text(
+                        text = "Somente Delivery / Entrega",
+                        color = TextMuted,
+                        fontSize = 11.sp
+                    )
+                }
+            }
+        },
+        bottomBar = {
+            NavigationBar(
+                containerColor = BgSecondary,
+                tonalElevation = 8.dp
+            ) {
+                // Aba 1: Cardápio
+                NavigationBarItem(
+                    selected = uiState.activeNavTab == 0,
+                    onClick = { viewModel.setNavTab(0) },
+                    icon = {
+                        Icon(Icons.Default.RestaurantMenu, contentDescription = "Cardápio")
+                    },
+                    label = { Text("Cardápio", fontSize = 11.sp, fontWeight = FontWeight.Bold) },
+                    colors = navigationItemColors()
+                )
+
+                // Aba 2: Carrinho (Abre a gaveta do carrinho)
+                NavigationBarItem(
+                    selected = uiState.isCartOpen,
+                    onClick = { viewModel.openCart() },
+                    icon = {
+                        BadgedBox(
+                            badge = {
+                                if (uiState.totalCartCount > 0) {
+                                    Badge(
+                                        containerColor = PrimaryOrange,
+                                        contentColor = TextDark
+                                    ) {
+                                        Text("${uiState.totalCartCount}", fontWeight = FontWeight.Bold)
+                                    }
+                                }
+                            }
+                        ) {
+                            Icon(Icons.Default.ShoppingCart, contentDescription = "Carrinho")
+                        }
+                    },
+                    label = { Text("Carrinho", fontSize = 11.sp, fontWeight = FontWeight.Bold) },
+                    colors = navigationItemColors()
+                )
+
+                // Aba 3: Rastreador
+                NavigationBarItem(
+                    selected = uiState.activeNavTab == 2,
+                    onClick = { viewModel.setNavTab(2) },
+                    icon = {
+                        Icon(Icons.Default.Assignment, contentDescription = "Rastreador")
+                    },
+                    label = { Text("Rastreador", fontSize = 11.sp, fontWeight = FontWeight.Bold) },
+                    colors = navigationItemColors()
+                )
+            }
+        }
+    ) { paddingValues ->
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+        ) {
+            when (uiState.activeNavTab) {
+                0 -> MenuScreen(viewModel = viewModel, uiState = uiState)
+                2 -> OrderTrackingScreen(viewModel = viewModel, uiState = uiState)
+                else -> MenuScreen(viewModel = viewModel, uiState = uiState)
+            }
+
+            // BottomSheets & Modals
+            if (uiState.isCustomizingOpen) {
+                CustomizationSheet(viewModel = viewModel, uiState = uiState)
+            }
+
+            if (uiState.isCartOpen) {
+                CartSheet(viewModel = viewModel, uiState = uiState)
+            }
+
+            if (uiState.isCheckoutOpen) {
+                CheckoutSheet(viewModel = viewModel, uiState = uiState)
+            }
+
+            if (uiState.isPixDialogOpen) {
+                PixDialog(viewModel = viewModel)
+            }
+        }
+    }
+}
+
+@Composable
+private fun navigationItemColors() = NavigationBarItemDefaults.colors(
+    selectedIconColor = PrimaryOrange,
+    selectedTextColor = PrimaryOrange,
+    unselectedIconColor = TextMuted,
+    unselectedTextColor = TextMuted,
+    indicatorColor = BgPrimary
+)
