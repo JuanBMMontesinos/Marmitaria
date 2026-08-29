@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # 🍔 Marmitaria do Dia - Aplicativo de Pedidos Mobile-First
 
 Este é um aplicativo moderno, elegante e otimizado para celulares (**Mobile-First**) voltado para o comércio de refeições diárias (marmitex). O aplicativo foi projetado com base nas imagens e no cardápio real do estabelecimento, apresentando um design escuro rústico e texturas premium simulando madeira escura e acabamentos dourados/alaranjados, ideal para gastronomia de alto padrão.
@@ -99,3 +100,7 @@ Depois, acesse no seu navegador: **`http://localhost:8080`**
 ## 🤝 Créditos
 
 Desenvolvido para proporcionar a melhor experiência de delivery rápida e satisfatória aos clientes da Marmitaria. Bom apetite! 😋
+=======
+# Marmitaria
+Aplicativo Android de um SaaS de entrega de marmitas
+>>>>>>> 1954d43f98802715863bf829765fd528c03de9be
