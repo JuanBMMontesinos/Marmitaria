@@ -1,8 +1,15 @@
 package com.marmitaria.marmitaria_do_dia.ui.screens
 
 import android.widget.Toast
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -27,9 +34,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -39,7 +48,6 @@ import com.marmitaria.marmitaria_do_dia.ui.theme.BgGlass
 import com.marmitaria.marmitaria_do_dia.ui.theme.BgPrimary
 import com.marmitaria.marmitaria_do_dia.ui.theme.BgSecondary
 import com.marmitaria.marmitaria_do_dia.ui.theme.BorderOrange
-import com.marmitaria.marmitaria_do_dia.ui.theme.ErrorRed
 import com.marmitaria.marmitaria_do_dia.ui.theme.PrimaryOrange
 import com.marmitaria.marmitaria_do_dia.ui.theme.TextDark
 import com.marmitaria.marmitaria_do_dia.ui.theme.TextGold
@@ -125,7 +133,7 @@ fun MainScreen(
                     colors = navigationItemColors()
                 )
 
-                // Aba 2: Carrinho (Abre a gaveta do carrinho)
+                // Aba 2: Carrinho (Abre a gaveta lateral do carrinho)
                 NavigationBarItem(
                     selected = uiState.isCartOpen,
                     onClick = { viewModel.openCart() },
@@ -173,19 +181,68 @@ fun MainScreen(
                 else -> MenuScreen(viewModel = viewModel, uiState = uiState)
             }
 
-            // BottomSheets & Modals
+            // 1. BottomSheet Modal de Customização (Desliza de baixo para cima)
             if (uiState.isCustomizingOpen) {
                 CustomizationSheet(viewModel = viewModel, uiState = uiState)
             }
 
-            if (uiState.isCartOpen) {
+            // 2. Gaveta Lateral do Carrinho (Desliza da direita para a esquerda)
+            AnimatedVisibility(
+                visible = uiState.isCartOpen,
+                enter = fadeIn(),
+                exit = fadeOut()
+            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(Color.Black.copy(alpha = 0.65f))
+                        .clickable(
+                            interactionSource = remember { MutableInteractionSource() },
+                            indication = null
+                        ) {
+                            viewModel.closeCart()
+                        }
+                )
+            }
+
+            AnimatedVisibility(
+                visible = uiState.isCartOpen,
+                enter = slideInHorizontally(initialOffsetX = { fullWidth -> fullWidth }),
+                exit = slideOutHorizontally(targetOffsetX = { fullWidth -> fullWidth }),
+                modifier = Modifier.align(Alignment.CenterEnd)
+            ) {
                 CartSheet(viewModel = viewModel, uiState = uiState)
             }
 
-            if (uiState.isCheckoutOpen) {
+            // 3. Gaveta Lateral do Checkout (Desliza da direita para a esquerda)
+            AnimatedVisibility(
+                visible = uiState.isCheckoutOpen,
+                enter = fadeIn(),
+                exit = fadeOut()
+            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(Color.Black.copy(alpha = 0.65f))
+                        .clickable(
+                            interactionSource = remember { MutableInteractionSource() },
+                            indication = null
+                        ) {
+                            viewModel.closeCheckout()
+                        }
+                )
+            }
+
+            AnimatedVisibility(
+                visible = uiState.isCheckoutOpen,
+                enter = slideInHorizontally(initialOffsetX = { fullWidth -> fullWidth }),
+                exit = slideOutHorizontally(targetOffsetX = { fullWidth -> fullWidth }),
+                modifier = Modifier.align(Alignment.CenterEnd)
+            ) {
                 CheckoutSheet(viewModel = viewModel, uiState = uiState)
             }
 
+            // 4. Modal do Pix
             if (uiState.isPixDialogOpen) {
                 PixDialog(viewModel = viewModel)
             }
