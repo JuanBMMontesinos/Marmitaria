@@ -82,20 +82,24 @@ fun CustomizationSheet(
                     Text(
                         text = meal.num.uppercase(),
                         color = PrimaryOrange,
+                        fontFamily = com.marmitaria.marmitaria_do_dia.ui.theme.OswaldFamily,
                         fontSize = 11.sp,
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Bold,
+                        letterSpacing = 1.sp
                     )
                     Text(
                         text = meal.name,
                         color = TextWhite,
-                        fontSize = 20.sp,
+                        fontFamily = com.marmitaria.marmitaria_do_dia.ui.theme.OswaldFamily,
+                        fontSize = 22.sp,
                         fontWeight = FontWeight.Bold,
-                        lineHeight = 24.sp
+                        lineHeight = 26.sp
                     )
                     Text(
                         text = WhatsAppHelper.formatPrice(uiState.customizingItemTotalPrice),
                         color = TextGold,
-                        fontSize = 18.sp,
+                        fontFamily = com.marmitaria.marmitaria_do_dia.ui.theme.OswaldFamily,
+                        fontSize = 20.sp,
                         fontWeight = FontWeight.Bold,
                         modifier = Modifier.padding(top = 4.dp)
                     )
@@ -108,6 +112,7 @@ fun CustomizationSheet(
             Text(
                 text = "${meal.accompaniments}. Todas as marmitas acompanham salada.",
                 color = TextMuted,
+                fontFamily = com.marmitaria.marmitaria_do_dia.ui.theme.InterFamily,
                 fontSize = 13.sp,
                 modifier = Modifier.padding(top = 8.dp, bottom = 16.dp)
             )

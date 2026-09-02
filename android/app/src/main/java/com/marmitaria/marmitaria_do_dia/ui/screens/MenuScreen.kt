@@ -198,7 +198,8 @@ fun MenuScreen(
             Text(
                 text = "Opções de Bebidas",
                 color = TextWhite,
-                fontSize = 18.sp,
+                fontFamily = com.marmitaria.marmitaria_do_dia.ui.theme.OswaldFamily,
+                fontSize = 20.sp,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.padding(top = 24.dp, bottom = 12.dp)
             )
@@ -225,13 +226,15 @@ fun MenuScreen(
                         Text(
                             text = drink.name,
                             color = TextWhite,
-                            fontSize = 14.sp,
+                            fontFamily = com.marmitaria.marmitaria_do_dia.ui.theme.OswaldFamily,
+                            fontSize = 15.sp,
                             fontWeight = FontWeight.Bold
                         )
                         Text(
                             text = drink.desc,
                             color = TextMuted,
-                            fontSize = 11.sp
+                            fontFamily = com.marmitaria.marmitaria_do_dia.ui.theme.InterFamily,
+                            fontSize = 12.sp
                         )
                     }
 
@@ -242,8 +245,9 @@ fun MenuScreen(
                         Text(
                             text = WhatsAppHelper.formatPrice(drink.price),
                             color = TextGold,
+                            fontFamily = com.marmitaria.marmitaria_do_dia.ui.theme.OswaldFamily,
                             fontWeight = FontWeight.Bold,
-                            fontSize = 14.sp
+                            fontSize = 15.sp
                         )
 
                         Box(
@@ -299,13 +303,16 @@ private fun MealCard(
                     Text(
                         text = meal.num.uppercase(),
                         color = PrimaryOrange,
+                        fontFamily = com.marmitaria.marmitaria_do_dia.ui.theme.OswaldFamily,
                         fontSize = 11.sp,
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Bold,
+                        letterSpacing = 1.sp
                     )
                     Text(
                         text = meal.name,
                         color = TextWhite,
-                        fontSize = 16.sp,
+                        fontFamily = com.marmitaria.marmitaria_do_dia.ui.theme.OswaldFamily,
+                        fontSize = 18.sp,
                         fontWeight = FontWeight.Bold
                     )
                 }
@@ -313,7 +320,8 @@ private fun MealCard(
                 Text(
                     text = WhatsAppHelper.formatPrice(meal.price),
                     color = TextGold,
-                    fontSize = 16.sp,
+                    fontFamily = com.marmitaria.marmitaria_do_dia.ui.theme.OswaldFamily,
+                    fontSize = 18.sp,
                     fontWeight = FontWeight.Bold
                 )
             }
@@ -321,7 +329,8 @@ private fun MealCard(
             Text(
                 text = "${meal.accompaniments}.",
                 color = TextMuted,
-                fontSize = 12.sp,
+                fontFamily = com.marmitaria.marmitaria_do_dia.ui.theme.InterFamily,
+                fontSize = 13.sp,
                 modifier = Modifier.padding(top = 4.dp, bottom = 10.dp)
             )
 

@@ -92,8 +92,10 @@ fun CheckoutSheet(
                 Text(
                     text = "Finalizar Pedido",
                     color = TextWhite,
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Bold
+                    fontFamily = com.marmitaria.marmitaria_do_dia.ui.theme.OswaldFamily,
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold,
+                    letterSpacing = 0.5.sp
                 )
                 IconButton(onClick = { viewModel.closeCheckout() }) {
                     Icon(Icons.Default.Close, contentDescription = "Fechar", tint = TextMuted)

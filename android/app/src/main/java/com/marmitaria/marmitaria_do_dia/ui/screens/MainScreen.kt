@@ -87,16 +87,17 @@ fun MainScreen(
                     Text(
                         text = "Cardápio",
                         color = TextWhite,
-                        fontSize = 24.sp,
+                        fontFamily = com.marmitaria.marmitaria_do_dia.ui.theme.OswaldFamily,
+                        fontSize = 28.sp,
                         fontWeight = FontWeight.Bold,
-                        letterSpacing = 1.sp
+                        letterSpacing = 1.5.sp
                     )
                     Text(
                         text = " do Dia",
                         color = TextGold,
-                        fontSize = 20.sp,
+                        fontFamily = com.marmitaria.marmitaria_do_dia.ui.theme.DancingScriptFamily,
+                        fontSize = 24.sp,
                         fontWeight = FontWeight.Bold,
-                        fontStyle = androidx.compose.ui.text.font.FontStyle.Italic,
                         modifier = Modifier.padding(start = 4.dp)
                     )
                 }
