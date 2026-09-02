@@ -8,6 +8,7 @@ import com.marmitaria.marmitaria_do_dia.data.model.DayMenu
 import com.marmitaria.marmitaria_do_dia.data.model.DeliveryType
 import com.marmitaria.marmitaria_do_dia.data.model.Drink
 import com.marmitaria.marmitaria_do_dia.data.model.MealOption
+import com.marmitaria.marmitaria_do_dia.data.model.MenuMode
 import com.marmitaria.marmitaria_do_dia.data.model.OrderDetails
 import com.marmitaria.marmitaria_do_dia.data.model.PaymentMethod
 import com.marmitaria.marmitaria_do_dia.data.repository.MenuRepository
@@ -24,6 +25,8 @@ import java.util.Date
 import java.util.Locale
 
 data class MenuUiState(
+    val menuMode: MenuMode = MenuMode.TODAY_ONLY,
+    val todayName: String = "Segunda-feira",
     val selectedDay: String = "Segunda-feira",
     val isSunday: Boolean = false,
     val showSundayWarning: Boolean = false,
@@ -42,8 +45,21 @@ data class MenuUiState(
     val trackingStepTimes: List<String> = listOf("--:--", "--:--", "--:--", "--:--"),
     val toastMessage: String? = null
 ) {
+    val displayedDay: String
+        get() = if (menuMode == MenuMode.TODAY_ONLY) todayName else selectedDay
+
     val currentDayMenu: DayMenu?
-        get() = MenuRepository.weeklyMenu[selectedDay]
+        get() = MenuRepository.weeklyMenu[displayedDay]
+
+    val isOrderingAllowedForSelectedDay: Boolean
+        get() {
+            if (isSunday) return false
+            return if (menuMode == MenuMode.TODAY_ONLY) {
+                true
+            } else {
+                selectedDay == todayName
+            }
+        }
 
     val subtotal: Double
         get() = cartItems.sumOf { it.totalPrice }
@@ -84,6 +100,7 @@ class MenuViewModel : ViewModel() {
         if (dayOfWeek == Calendar.SUNDAY) {
             _uiState.update {
                 it.copy(
+                    todayName = "Segunda-feira",
                     selectedDay = "Segunda-feira",
                     isSunday = true,
                     showSundayWarning = true
@@ -101,11 +118,21 @@ class MenuViewModel : ViewModel() {
             }
             _uiState.update {
                 it.copy(
+                    todayName = dayName,
                     selectedDay = dayName,
                     isSunday = false,
                     showSundayWarning = false
                 )
             }
+        }
+    }
+
+    fun setMenuMode(mode: MenuMode) {
+        _uiState.update {
+            it.copy(
+                menuMode = mode,
+                showSundayWarning = false
+            )
         }
     }
 
@@ -120,6 +147,16 @@ class MenuViewModel : ViewModel() {
     }
 
     fun openCustomizeModal(meal: MealOption) {
+        val state = _uiState.value
+        if (!state.isOrderingAllowedForSelectedDay) {
+            if (state.isSunday) {
+                showToast("Estamos fechados hoje (Domingo). Não é possível realizar pedidos.")
+            } else {
+                showToast("O cardápio de ${state.selectedDay} está em Modo Consulta. Mude para 'Cardápio de Hoje' para fazer seu pedido.")
+            }
+            return
+        }
+
         _uiState.update {
             it.copy(
                 isCustomizingOpen = true,
@@ -169,7 +206,8 @@ class MenuViewModel : ViewModel() {
             qty = state.customizingQty,
             preferences = state.customizingPreferences.trim(),
             adicionais = state.customizingSelectedAddons,
-            unitPrice = state.customizingItemUnitPrice
+            unitPrice = state.customizingItemUnitPrice,
+            dayName = state.displayedDay
         )
 
         _uiState.update {
@@ -183,11 +221,18 @@ class MenuViewModel : ViewModel() {
     }
 
     fun addDrink(drink: Drink) {
+        val state = _uiState.value
+        if (state.isSunday) {
+            showToast("Estamos fechados hoje (Domingo). Não é possível realizar pedidos.")
+            return
+        }
+
         val item = CartItem(
             id = drink.id,
             name = drink.name,
             qty = 1,
-            unitPrice = drink.price
+            unitPrice = drink.price,
+            dayName = state.todayName
         )
         _uiState.update {
             it.copy(cartItems = it.cartItems + item)

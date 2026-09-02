@@ -21,7 +21,12 @@ object WhatsAppHelper {
         return currencyFormat.format(value)
     }
 
-    fun buildOrderMessage(orderDetails: OrderDetails, cartItems: List<CartItem>, total: Double): String {
+    fun buildOrderMessage(
+        orderDetails: OrderDetails,
+        cartItems: List<CartItem>,
+        total: Double,
+        orderDay: String = ""
+    ): String {
         val itemsBuilder = StringBuilder()
 
         cartItems.forEach { item ->
@@ -62,8 +67,10 @@ object WhatsAppHelper {
             ""
         }
 
+        val dayHeader = if (orderDay.isNotBlank()) " ($orderDay)" else ""
+
         return """
-*🍔 NOVO PEDIDO - MARMITARIA DO DIA*
+*🍔 NOVO PEDIDO - MARMITARIA DO DIA$dayHeader*
 ----------------------------------
 *CLIENTE:* ${orderDetails.clientName}
 *TELEFONE:* ${orderDetails.clientPhone}

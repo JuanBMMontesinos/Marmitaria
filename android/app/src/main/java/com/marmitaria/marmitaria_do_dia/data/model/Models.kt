@@ -28,6 +28,11 @@ data class Addon(
     val price: Double
 )
 
+enum class MenuMode {
+    TODAY_ONLY,    // Cardápio de Hoje (Permite Pedidos)
+    WEEKLY_CATALOG // Consulta Semanal (Apenas Visualização)
+}
+
 data class CartItem(
     val cartId: String = UUID.randomUUID().toString(),
     val id: String,
@@ -36,7 +41,8 @@ data class CartItem(
     val qty: Int = 1,
     val preferences: String = "",
     val adicionais: List<Addon> = emptyList(),
-    val unitPrice: Double
+    val unitPrice: Double,
+    val dayName: String = ""
 ) {
     val totalPrice: Double
         get() = unitPrice * qty

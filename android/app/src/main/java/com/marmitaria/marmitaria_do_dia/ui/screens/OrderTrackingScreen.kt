@@ -218,7 +218,8 @@ fun OrderTrackingScreen(
                 val message = WhatsAppHelper.buildOrderMessage(
                     orderDetails = uiState.orderDetails,
                     cartItems = uiState.cartItems,
-                    total = uiState.total
+                    total = uiState.total,
+                    orderDay = uiState.todayName
                 )
                 WhatsAppHelper.openWhatsApp(context, message)
             },

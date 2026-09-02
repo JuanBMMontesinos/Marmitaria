@@ -25,7 +25,6 @@ import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedButton
@@ -92,14 +91,22 @@ fun CartSheet(
                         modifier = Modifier.size(22.dp)
                     )
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text(
-                        text = "Seu Carrinho",
-                        color = TextWhite,
-                        fontFamily = com.marmitaria.marmitaria_do_dia.ui.theme.OswaldFamily,
-                        fontSize = 20.sp,
-                        fontWeight = FontWeight.Bold,
-                        letterSpacing = 0.5.sp
-                    )
+                    Column {
+                        Text(
+                            text = "Seu Carrinho",
+                            color = TextWhite,
+                            fontFamily = com.marmitaria.marmitaria_do_dia.ui.theme.OswaldFamily,
+                            fontSize = 20.sp,
+                            fontWeight = FontWeight.Bold,
+                            letterSpacing = 0.5.sp
+                        )
+                        Text(
+                            text = "Pedido para Hoje (${uiState.todayName})",
+                            color = TextGold,
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Medium
+                        )
+                    }
                 }
                 IconButton(onClick = { viewModel.closeCart() }) {
                     Icon(Icons.Default.Close, contentDescription = "Fechar", tint = TextMuted)

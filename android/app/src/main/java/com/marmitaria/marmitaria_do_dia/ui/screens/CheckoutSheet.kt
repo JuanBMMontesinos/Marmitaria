@@ -22,7 +22,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
@@ -111,6 +110,26 @@ fun CheckoutSheet(
                     .verticalScroll(rememberScrollState())
             ) {
                 Spacer(modifier = Modifier.height(14.dp))
+
+                // Badge do dia do pedido
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(BgCard)
+                        .border(1.dp, BorderOrange, RoundedCornerShape(8.dp))
+                        .padding(horizontal = 12.dp, vertical = 8.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "📅 Pedido para Hoje: ${uiState.todayName}",
+                        color = TextGold,
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(12.dp))
 
                 // Alternador Entrega vs Retirada
                 Row(
