@@ -2,6 +2,7 @@ package com.marmitaria.marmitaria_do_dia.ui.screens
 
 import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
@@ -38,7 +39,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -70,49 +73,96 @@ fun MainScreen(
         }
     }
 
+    // Animação de Pulso contínuo para o Badge de Delivery
+    val infiniteTransition = androidx.compose.animation.core.rememberInfiniteTransition(label = "pulseTransition")
+    val pulseScale by infiniteTransition.animateFloat(
+        initialValue = 1f,
+        targetValue = 1.06f,
+        animationSpec = androidx.compose.animation.core.infiniteRepeatable(
+            animation = androidx.compose.animation.core.tween(1000, easing = androidx.compose.animation.core.FastOutSlowInEasing),
+            repeatMode = androidx.compose.animation.core.RepeatMode.Reverse
+        ),
+        label = "pulseScale"
+    )
+
     Scaffold(
         containerColor = BgPrimary,
         topBar = {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(BgSecondary)
-                    .padding(top = 16.dp, bottom = 12.dp),
+                    .background(
+                        androidx.compose.ui.graphics.Brush.verticalGradient(
+                            colors = listOf(
+                                androidx.compose.ui.graphics.Color(0xE61C0F0A),
+                                androidx.compose.ui.graphics.Color(0xD9120905)
+                            )
+                        )
+                    )
+                    .border(
+                        androidx.compose.foundation.BorderStroke(
+                            2.dp,
+                            com.marmitaria.marmitaria_do_dia.ui.theme.PrimaryDark
+                        )
+                    )
+                    .padding(top = 20.dp, bottom = 16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Row(
-                    verticalAlignment = Alignment.Bottom,
-                    horizontalArrangement = Arrangement.Center
+                // Título com sobreposição orgânica
+                Box(
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                    contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = "Cardápio",
+                        text = "CARDÁPIO",
                         color = TextWhite,
                         fontFamily = com.marmitaria.marmitaria_do_dia.ui.theme.OswaldFamily,
-                        fontSize = 28.sp,
+                        fontSize = 38.sp,
                         fontWeight = FontWeight.Bold,
-                        letterSpacing = 1.5.sp
+                        letterSpacing = 2.sp,
+                        style = androidx.compose.ui.text.TextStyle(
+                            shadow = androidx.compose.ui.graphics.Shadow(
+                                color = androidx.compose.ui.graphics.Color.Black.copy(alpha = 0.85f),
+                                offset = androidx.compose.ui.geometry.Offset(2f, 4f),
+                                blurRadius = 8f
+                            )
+                        )
                     )
                     Text(
-                        text = " do Dia",
+                        text = "do Dia",
                         color = TextGold,
                         fontFamily = com.marmitaria.marmitaria_do_dia.ui.theme.DancingScriptFamily,
-                        fontSize = 24.sp,
+                        fontSize = 28.sp,
                         fontWeight = FontWeight.Bold,
-                        modifier = Modifier.padding(start = 4.dp)
+                        modifier = Modifier
+                            .align(Alignment.BottomEnd)
+                            .rotate(-6f),
+                        style = androidx.compose.ui.text.TextStyle(
+                            shadow = androidx.compose.ui.graphics.Shadow(
+                                color = androidx.compose.ui.graphics.Color.Black.copy(alpha = 0.9f),
+                                offset = androidx.compose.ui.geometry.Offset(1f, 2f),
+                                blurRadius = 6f
+                            )
+                        )
                     )
                 }
 
+                // Badge de Delivery com Animação de Pulso contínua
                 Box(
                     modifier = Modifier
-                        .padding(top = 4.dp)
+                        .padding(top = 16.dp)
+                        .graphicsLayer(scaleX = pulseScale, scaleY = pulseScale)
                         .clip(RoundedCornerShape(20.dp))
-                        .background(BgGlass)
-                        .border(1.dp, BorderOrange, RoundedCornerShape(20.dp))
-                        .padding(horizontal = 12.dp, vertical = 2.dp)
+                        .background(PrimaryOrange.copy(alpha = 0.12f))
+                        .border(1.dp, PrimaryOrange, RoundedCornerShape(20.dp))
+                        .padding(horizontal = 14.dp, vertical = 4.dp)
                 ) {
                     Text(
-                        text = "Somente Delivery / Entrega",
-                        color = TextMuted,
+                        text = "SOMENTE DELIVERY / ENTREGA",
+                        color = PrimaryOrange,
+                        fontFamily = com.marmitaria.marmitaria_do_dia.ui.theme.InterFamily,
+                        fontWeight = FontWeight.Bold,
+                        letterSpacing = 1.sp,
                         fontSize = 11.sp
                     )
                 }

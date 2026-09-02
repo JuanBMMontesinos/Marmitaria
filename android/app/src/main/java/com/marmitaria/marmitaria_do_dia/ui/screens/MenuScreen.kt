@@ -7,8 +7,10 @@ import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -26,6 +28,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -211,7 +214,7 @@ fun MenuScreen(
                     .fillMaxWidth()
                     .padding(vertical = 4.dp)
                     .clickable { viewModel.addDrink(drink) },
-                shape = RoundedCornerShape(10.dp),
+                shape = RoundedCornerShape(12.dp),
                 colors = CardDefaults.cardColors(containerColor = BgCard),
                 border = androidx.compose.foundation.BorderStroke(1.dp, BorderLight)
             ) {
@@ -240,27 +243,28 @@ fun MenuScreen(
 
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
                     ) {
                         Text(
                             text = WhatsAppHelper.formatPrice(drink.price),
                             color = TextGold,
                             fontFamily = com.marmitaria.marmitaria_do_dia.ui.theme.OswaldFamily,
                             fontWeight = FontWeight.Bold,
-                            fontSize = 15.sp
+                            fontSize = 16.sp
                         )
 
                         Box(
                             modifier = Modifier
                                 .size(28.dp)
-                                .clip(RoundedCornerShape(6.dp))
-                                .background(PrimaryOrange),
+                                .clip(RoundedCornerShape(14.dp))
+                                .background(PrimaryOrange.copy(alpha = 0.12f))
+                                .border(1.dp, PrimaryOrange, RoundedCornerShape(14.dp)),
                             contentAlignment = Alignment.Center
                         ) {
                             Icon(
                                 Icons.Default.Add,
                                 contentDescription = "Adicionar",
-                                tint = TextDark,
+                                tint = PrimaryOrange,
                                 modifier = Modifier.size(16.dp)
                             )
                         }
@@ -285,92 +289,137 @@ private fun MealCard(
             .fillMaxWidth()
             .padding(vertical = 6.dp)
             .clickable { onOrderClick() },
-        shape = RoundedCornerShape(12.dp),
+        shape = RoundedCornerShape(14.dp),
         colors = CardDefaults.cardColors(containerColor = BgCard),
-        border = androidx.compose.foundation.BorderStroke(1.dp, BorderLight)
+        border = androidx.compose.foundation.BorderStroke(1.dp, BorderOrange)
     ) {
-        Column(
+        Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(14.dp)
+                .height(IntrinsicSize.Min)
         ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.Top
+            // Faixa Laranja Lateral Esquerda (4px)
+            Box(
+                modifier = Modifier
+                    .width(4.dp)
+                    .fillMaxHeight()
+                    .background(PrimaryOrange)
+            )
+
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(16.dp)
             ) {
-                Column(modifier = Modifier.weight(1f)) {
+                // Cabeçalho do Card
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.Top
+                ) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = meal.num.uppercase(),
+                            color = PrimaryOrange,
+                            fontFamily = com.marmitaria.marmitaria_do_dia.ui.theme.InterFamily,
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Bold,
+                            letterSpacing = 1.sp
+                        )
+                        Text(
+                            text = meal.name.uppercase(),
+                            color = TextWhite,
+                            fontFamily = com.marmitaria.marmitaria_do_dia.ui.theme.OswaldFamily,
+                            fontSize = 19.sp,
+                            fontWeight = FontWeight.Bold,
+                            lineHeight = 23.sp
+                        )
+                    }
+
                     Text(
-                        text = meal.num.uppercase(),
-                        color = PrimaryOrange,
+                        text = WhatsAppHelper.formatPrice(meal.price),
+                        color = TextGold,
                         fontFamily = com.marmitaria.marmitaria_do_dia.ui.theme.OswaldFamily,
-                        fontSize = 11.sp,
+                        fontSize = 20.sp,
                         fontWeight = FontWeight.Bold,
-                        letterSpacing = 1.sp
-                    )
-                    Text(
-                        text = meal.name,
-                        color = TextWhite,
-                        fontFamily = com.marmitaria.marmitaria_do_dia.ui.theme.OswaldFamily,
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.Bold
+                        modifier = Modifier.padding(start = 8.dp)
                     )
                 }
 
                 Text(
-                    text = WhatsAppHelper.formatPrice(meal.price),
-                    color = TextGold,
-                    fontFamily = com.marmitaria.marmitaria_do_dia.ui.theme.OswaldFamily,
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Bold
+                    text = "${meal.accompaniments}.",
+                    color = TextMuted,
+                    fontFamily = com.marmitaria.marmitaria_do_dia.ui.theme.InterFamily,
+                    fontSize = 13.sp,
+                    lineHeight = 18.sp,
+                    modifier = Modifier.padding(top = 6.dp, bottom = 4.dp)
                 )
-            }
 
-            Text(
-                text = "${meal.accompaniments}.",
-                color = TextMuted,
-                fontFamily = com.marmitaria.marmitaria_do_dia.ui.theme.InterFamily,
-                fontSize = 13.sp,
-                modifier = Modifier.padding(top = 4.dp, bottom = 10.dp)
-            )
+                // Divisória sutil
+                HorizontalDivider(
+                    color = BorderOrange.copy(alpha = 0.4f),
+                    thickness = 1.dp,
+                    modifier = Modifier.padding(vertical = 10.dp)
+                )
 
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Box(
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(4.dp))
-                        .background(BgPrimary)
-                        .padding(horizontal = 6.dp, vertical = 2.dp)
+                // Rodapé do Card
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(
-                        text = "Acomp. Salada",
-                        color = TextMuted,
-                        fontSize = 10.sp
-                    )
-                }
+                    // Tag Acomp. Salada em Pílula
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(20.dp))
+                            .background(androidx.compose.ui.graphics.Color.White.copy(alpha = 0.05f))
+                            .border(
+                                1.dp,
+                                androidx.compose.ui.graphics.Color.White.copy(alpha = 0.1f),
+                                RoundedCornerShape(20.dp)
+                            )
+                            .padding(horizontal = 10.dp, vertical = 4.dp)
+                    ) {
+                        Text(
+                            text = "ACOMP. SALADA",
+                            color = TextMuted,
+                            fontFamily = com.marmitaria.marmitaria_do_dia.ui.theme.InterFamily,
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.Bold,
+                            letterSpacing = 0.5.sp
+                        )
+                    }
 
-                Button(
-                    onClick = onOrderClick,
-                    shape = RoundedCornerShape(6.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = PrimaryOrange),
-                    modifier = Modifier.height(34.dp)
-                ) {
-                    Icon(
-                        Icons.Default.Add,
-                        contentDescription = null,
-                        tint = TextDark,
-                        modifier = Modifier.size(16.dp)
-                    )
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text(
-                        text = "Pedir",
-                        color = TextDark,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 12.sp
-                    )
+                    // Botão Pedir Vazado Estilizado
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(PrimaryOrange.copy(alpha = 0.12f))
+                            .border(1.dp, PrimaryOrange, RoundedCornerShape(8.dp))
+                            .clickable { onOrderClick() }
+                            .padding(horizontal = 14.dp, vertical = 6.dp)
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.Center
+                        ) {
+                            Icon(
+                                Icons.Default.Add,
+                                contentDescription = null,
+                                tint = PrimaryOrange,
+                                modifier = Modifier.size(15.dp)
+                            )
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text(
+                                text = "PEDIR",
+                                color = PrimaryOrange,
+                                fontFamily = com.marmitaria.marmitaria_do_dia.ui.theme.InterFamily,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 12.sp,
+                                letterSpacing = 0.5.sp
+                            )
+                        }
+                    }
                 }
             }
         }
