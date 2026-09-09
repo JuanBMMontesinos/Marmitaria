@@ -37,7 +37,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.marmitaria.marmitaria_do_dia.data.repository.MenuRepository
 import com.marmitaria.marmitaria_do_dia.ui.theme.BgCard
 import com.marmitaria.marmitaria_do_dia.ui.theme.BgPrimary
 import com.marmitaria.marmitaria_do_dia.ui.theme.BorderOrange
@@ -160,7 +159,7 @@ fun CustomizationSheet(
                 modifier = Modifier.padding(bottom = 8.dp)
             )
 
-            MenuRepository.availableAddons.forEach { addon ->
+            uiState.availableAddons.forEach { addon ->
                 val isChecked = uiState.customizingSelectedAddons.any { it.id == addon.id }
                 Row(
                     modifier = Modifier

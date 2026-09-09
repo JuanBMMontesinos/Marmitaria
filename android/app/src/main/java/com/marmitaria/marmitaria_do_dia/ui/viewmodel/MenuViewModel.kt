@@ -11,7 +11,13 @@ import com.marmitaria.marmitaria_do_dia.data.model.MealOption
 import com.marmitaria.marmitaria_do_dia.data.model.MenuMode
 import com.marmitaria.marmitaria_do_dia.data.model.OrderDetails
 import com.marmitaria.marmitaria_do_dia.data.model.PaymentMethod
+import com.marmitaria.marmitaria_do_dia.data.network.dto.AddressDto
+import com.marmitaria.marmitaria_do_dia.data.network.dto.CustomerDto
+import com.marmitaria.marmitaria_do_dia.data.network.dto.DeliveryZoneDto
+import com.marmitaria.marmitaria_do_dia.data.network.dto.OrderItemRequestDto
+import com.marmitaria.marmitaria_do_dia.data.network.dto.OrderRequestDto
 import com.marmitaria.marmitaria_do_dia.data.repository.MenuRepository
+import com.marmitaria.marmitaria_do_dia.data.repository.MenuRepository.toDomain
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -29,7 +35,9 @@ data class MenuUiState(
     val todayName: String = "Segunda-feira",
     val selectedDay: String = "Segunda-feira",
     val isSunday: Boolean = false,
-    val showSundayWarning: Boolean = false,
+    val isClosed: Boolean = false,
+    val closedMessage: String? = null,
+    val showClosedWarning: Boolean = false,
     val cartItems: List<CartItem> = emptyList(),
     val isCustomizingOpen: Boolean = false,
     val customizingMeal: MealOption? = null,
@@ -43,17 +51,39 @@ data class MenuUiState(
     val orderDetails: OrderDetails = OrderDetails(),
     val trackingStep: Int = 0,
     val trackingStepTimes: List<String> = listOf("--:--", "--:--", "--:--", "--:--"),
-    val toastMessage: String? = null
+    val toastMessage: String? = null,
+
+    // API Integration Fields
+    val isLoading: Boolean = false,
+    val errorMessage: String? = null,
+    val todayOptions: List<MealOption> = emptyList(),
+    val availableDrinks: List<Drink> = MenuRepository.drinks,
+    val availableAddons: List<Addon> = MenuRepository.availableAddons,
+    val weeklyMenu: Map<String, DayMenu> = MenuRepository.weeklyMenu,
+    val pixKey: String = MenuRepository.PIX_KEY,
+    val qrCode: String? = null,
+    val whatsappPhone: String = MenuRepository.WHATSAPP_PHONE,
+    val restaurantAddress: String = MenuRepository.RESTAURANT_ADDRESS,
+    val takeoutOpenTime: String = MenuRepository.TAKEOUT_OPEN_TIME,
+    val lastOrderNumber: String? = null,
+    val deliveryZones: List<DeliveryZoneDto> = emptyList()
 ) {
     val displayedDay: String
         get() = if (menuMode == MenuMode.TODAY_ONLY) todayName else selectedDay
 
     val currentDayMenu: DayMenu?
-        get() = MenuRepository.weeklyMenu[displayedDay]
+        get() {
+            return if (menuMode == MenuMode.TODAY_ONLY) {
+                val options = if (todayOptions.isNotEmpty()) todayOptions else MenuRepository.weeklyMenu[todayName]?.options ?: emptyList()
+                DayMenu(dayName = todayName, options = options)
+            } else {
+                weeklyMenu[displayedDay] ?: MenuRepository.weeklyMenu[displayedDay]
+            }
+        }
 
     val isOrderingAllowedForSelectedDay: Boolean
         get() {
-            if (isSunday) return false
+            if (isClosed) return false
             return if (menuMode == MenuMode.TODAY_ONLY) {
                 true
             } else {
@@ -91,6 +121,85 @@ class MenuViewModel : ViewModel() {
 
     init {
         detectCurrentDay()
+        loadTodayMenu()
+        loadSettings()
+        loadWeeklyMenu()
+        loadDeliveryZones()
+    }
+
+    fun loadTodayMenu() {
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true, errorMessage = null) }
+            val result = MenuRepository.fetchTodayMenu()
+            result.onSuccess { todayDto ->
+                _uiState.update { state ->
+                    val options = todayDto.options?.map { it.toDomain() } ?: emptyList()
+                    val drinks = todayDto.drinks?.map { it.toDomain() }
+                    val addons = todayDto.addons?.map { it.toDomain() }
+                    val isOpen = todayDto.isOpen ?: true
+                    val isClosed = !isOpen || state.isSunday
+
+                    state.copy(
+                        todayName = todayDto.dayName ?: state.todayName,
+                        selectedDay = if (state.menuMode == MenuMode.TODAY_ONLY) (todayDto.dayName ?: state.todayName) else state.selectedDay,
+                        todayOptions = if (options.isNotEmpty()) options else state.todayOptions,
+                        availableDrinks = if (!drinks.isNullOrEmpty()) drinks else state.availableDrinks,
+                        availableAddons = if (!addons.isNullOrEmpty()) addons else state.availableAddons,
+                        isClosed = isClosed,
+                        showClosedWarning = isClosed,
+                        closedMessage = if (isClosed) {
+                            if (state.isSunday) "Estamos fechados hoje (Domingo). Consulte abaixo o cardápio da semana!"
+                            else (todayDto.message ?: "No momento a marmitaria está fechada para novos pedidos.")
+                        } else null,
+                        isLoading = false,
+                        errorMessage = null
+                    )
+                }
+            }.onFailure { error ->
+                _uiState.update {
+                    it.copy(
+                        isLoading = false,
+                        errorMessage = "Erro ao carregar cardápio de hoje: ${error.localizedMessage}"
+                    )
+                }
+            }
+        }
+    }
+
+    fun loadWeeklyMenu() {
+        viewModelScope.launch {
+            val result = MenuRepository.fetchWeeklyMenu()
+            result.onSuccess { weeklyMap ->
+                if (weeklyMap.isNotEmpty()) {
+                    _uiState.update { it.copy(weeklyMenu = weeklyMap) }
+                }
+            }
+        }
+    }
+
+    fun loadSettings() {
+        viewModelScope.launch {
+            val result = MenuRepository.fetchSettings()
+            result.onSuccess { settings ->
+                _uiState.update { state ->
+                    state.copy(
+                        pixKey = settings.pixKey ?: state.pixKey,
+                        whatsappPhone = settings.whatsappPhone ?: state.whatsappPhone,
+                        restaurantAddress = settings.restaurantAddress ?: state.restaurantAddress,
+                        takeoutOpenTime = settings.takeoutOpenTime ?: state.takeoutOpenTime
+                    )
+                }
+            }
+        }
+    }
+
+    fun loadDeliveryZones() {
+        viewModelScope.launch {
+            val result = MenuRepository.fetchDeliveryZones()
+            result.onSuccess { zones ->
+                _uiState.update { it.copy(deliveryZones = zones) }
+            }
+        }
     }
 
     private fun detectCurrentDay() {
@@ -100,10 +209,12 @@ class MenuViewModel : ViewModel() {
         if (dayOfWeek == Calendar.SUNDAY) {
             _uiState.update {
                 it.copy(
-                    todayName = "Segunda-feira",
+                    todayName = "Domingo",
                     selectedDay = "Segunda-feira",
                     isSunday = true,
-                    showSundayWarning = true
+                    isClosed = true,
+                    showClosedWarning = true,
+                    closedMessage = "Estamos fechados hoje (Domingo). Consulte abaixo o cardápio da semana!"
                 )
             }
         } else {
@@ -121,7 +232,9 @@ class MenuViewModel : ViewModel() {
                     todayName = dayName,
                     selectedDay = dayName,
                     isSunday = false,
-                    showSundayWarning = false
+                    isClosed = false,
+                    showClosedWarning = false,
+                    closedMessage = null
                 )
             }
         }
@@ -130,8 +243,7 @@ class MenuViewModel : ViewModel() {
     fun setMenuMode(mode: MenuMode) {
         _uiState.update {
             it.copy(
-                menuMode = mode,
-                showSundayWarning = false
+                menuMode = mode
             )
         }
     }
@@ -139,8 +251,7 @@ class MenuViewModel : ViewModel() {
     fun selectDay(day: String) {
         _uiState.update {
             it.copy(
-                selectedDay = day,
-                showSundayWarning = false
+                selectedDay = day
             )
         }
         showToast("Mostrando cardápio de $day")
@@ -149,8 +260,8 @@ class MenuViewModel : ViewModel() {
     fun openCustomizeModal(meal: MealOption) {
         val state = _uiState.value
         if (!state.isOrderingAllowedForSelectedDay) {
-            if (state.isSunday) {
-                showToast("Estamos fechados hoje (Domingo). Não é possível realizar pedidos.")
+            if (state.isClosed) {
+                showToast(state.closedMessage ?: "A marmitaria está fechada no momento.")
             } else {
                 showToast("O cardápio de ${state.selectedDay} está em Modo Consulta. Mude para 'Cardápio de Hoje' para fazer seu pedido.")
             }
@@ -222,8 +333,8 @@ class MenuViewModel : ViewModel() {
 
     fun addDrink(drink: Drink) {
         val state = _uiState.value
-        if (state.isSunday) {
-            showToast("Estamos fechados hoje (Domingo). Não é possível realizar pedidos.")
+        if (state.isClosed) {
+            showToast(state.closedMessage ?: "A marmitaria está fechada no momento.")
             return
         }
 
@@ -295,7 +406,8 @@ class MenuViewModel : ViewModel() {
     }
 
     fun finalizeOrder() {
-        val details = _uiState.value.orderDetails
+        val state = _uiState.value
+        val details = state.orderDetails
 
         if (details.clientName.isBlank() || details.clientPhone.isBlank()) {
             showToast("Preencha Nome e Telefone!")
@@ -309,10 +421,69 @@ class MenuViewModel : ViewModel() {
             }
         }
 
-        if (details.paymentMethod == PaymentMethod.PIX) {
-            _uiState.update { it.copy(isCheckoutOpen = false, isPixDialogOpen = true) }
-        } else {
-            confirmOrderCompletion()
+        val orderRequest = OrderRequestDto(
+            customer = CustomerDto(
+                fullName = details.clientName,
+                phone = details.clientPhone
+            ),
+            address = if (details.deliveryType == DeliveryType.DELIVERY) {
+                AddressDto(
+                    street = details.street,
+                    number = details.number,
+                    neighborhood = details.neighborhood,
+                    zipCode = details.cep,
+                    complement = details.complement,
+                    reference = details.reference
+                )
+            } else null,
+            deliveryType = details.deliveryType.name,
+            paymentMethod = details.paymentMethod.name,
+            cashChangeFor = if (details.needChange && details.changeFor > 0) details.changeFor else null,
+            items = state.cartItems.map { item ->
+                OrderItemRequestDto(
+                    menuItemId = item.id,
+                    quantity = item.qty,
+                    notes = item.preferences.ifBlank { null },
+                    selectedAddons = item.adicionais.map { it.name },
+                    name = item.name,
+                    unitPrice = item.unitPrice
+                )
+            },
+            clientName = details.clientName,
+            clientPhone = details.clientPhone,
+            totalAmount = state.total
+        )
+
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true) }
+            val result = MenuRepository.createOrder(orderRequest)
+
+            result.onSuccess { response ->
+                _uiState.update { currentState ->
+                    currentState.copy(
+                        isLoading = false,
+                        lastOrderNumber = response.orderNumber,
+                        pixKey = response.pixKey ?: currentState.pixKey,
+                        qrCode = response.qrCode ?: currentState.qrCode
+                    )
+                }
+                showToast("Pedido ${response.orderNumber ?: ""} enviado com sucesso!")
+
+                if (details.paymentMethod == PaymentMethod.PIX) {
+                    _uiState.update { it.copy(isCheckoutOpen = false, isPixDialogOpen = true) }
+                } else {
+                    confirmOrderCompletion()
+                }
+            }.onFailure { error ->
+                _uiState.update { it.copy(isLoading = false) }
+                showToast("Aviso: Falha ao enviar para o servidor (${error.localizedMessage}). Continuando pedido.")
+
+                if (details.paymentMethod == PaymentMethod.PIX) {
+                    _uiState.update { it.copy(isCheckoutOpen = false, isPixDialogOpen = true) }
+                } else {
+                    confirmOrderCompletion()
+                }
+            }
         }
     }
 

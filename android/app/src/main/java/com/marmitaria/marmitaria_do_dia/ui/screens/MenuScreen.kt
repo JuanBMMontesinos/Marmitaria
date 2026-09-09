@@ -25,9 +25,13 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.RestaurantMenu
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -70,8 +74,87 @@ fun MenuScreen(
             .fillMaxSize()
             .padding(horizontal = 16.dp)
     ) {
-        // Banner de Fechamento de Domingo
-        if (uiState.showSundayWarning) {
+        // Indicador de Carregamento da API
+        if (uiState.isLoading) {
+            item {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 16.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(20.dp),
+                            color = PrimaryOrange,
+                            strokeWidth = 2.dp
+                        )
+                        Text(
+                            text = "Atualizando cardápio via API...",
+                            color = TextGold,
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                    }
+                }
+            }
+        }
+
+        // Banner de Erro na Conexão com a API (com botão tentar novamente)
+        if (uiState.errorMessage != null) {
+            item {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 8.dp, bottom = 8.dp)
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(BgCard)
+                        .border(1.dp, ErrorRed, RoundedCornerShape(8.dp))
+                        .padding(12.dp)
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = "⚠️ Erro de conexão com a API",
+                                color = ErrorRed,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 12.sp
+                            )
+                            Text(
+                                text = "Usando dados offline salvos.",
+                                color = TextMuted,
+                                fontSize = 11.sp
+                            )
+                        }
+                        Button(
+                            onClick = { viewModel.loadTodayMenu() },
+                            colors = ButtonDefaults.buttonColors(containerColor = PrimaryOrange),
+                            shape = RoundedCornerShape(6.dp),
+                            modifier = Modifier.height(32.dp)
+                        ) {
+                            Icon(
+                                Icons.Default.Refresh,
+                                contentDescription = "Tentar Novamente",
+                                tint = TextDark,
+                                modifier = Modifier.size(14.dp)
+                            )
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text("Tentar", color = TextDark, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                        }
+                    }
+                }
+            }
+        }
+
+        // Banner de Fechamento (Domingo ou Fora do Horário)
+        if (uiState.showClosedWarning) {
             item {
                 Box(
                     modifier = Modifier
@@ -84,13 +167,13 @@ fun MenuScreen(
                 ) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Text(
-                            text = "📢 ESTAMOS FECHADOS HOJE (DOMINGO)",
+                            text = if (uiState.isSunday) "📢 ESTAMOS FECHADOS HOJE (DOMINGO)" else "📢 MARMITARIA FECHADA NO MOMENTO",
                             color = TextWhite,
                             fontWeight = FontWeight.Bold,
                             fontSize = 13.sp
                         )
                         Text(
-                            text = "Consulte abaixo o menu semanal para planejar seus próximos pedidos!",
+                            text = uiState.closedMessage ?: "Consulte abaixo o menu semanal para planejar seus próximos pedidos!",
                             color = TextWhite,
                             fontSize = 11.sp,
                             textAlign = TextAlign.Center
@@ -323,7 +406,7 @@ fun MenuScreen(
             )
         }
 
-        items(MenuRepository.drinks, key = { it.id }) { drink ->
+        items(uiState.availableDrinks, key = { it.id }) { drink ->
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -563,4 +646,3 @@ private fun MealCard(
         }
     }
 }
-

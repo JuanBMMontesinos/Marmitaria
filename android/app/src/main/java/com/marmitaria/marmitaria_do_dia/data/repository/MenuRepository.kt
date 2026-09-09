@@ -1,9 +1,22 @@
 package com.marmitaria.marmitaria_do_dia.data.repository
 
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import com.marmitaria.marmitaria_do_dia.data.model.Addon
 import com.marmitaria.marmitaria_do_dia.data.model.DayMenu
 import com.marmitaria.marmitaria_do_dia.data.model.Drink
 import com.marmitaria.marmitaria_do_dia.data.model.MealOption
+import com.marmitaria.marmitaria_do_dia.data.network.MarmitariaApiService
+import com.marmitaria.marmitaria_do_dia.data.network.RetrofitClient
+import com.marmitaria.marmitaria_do_dia.data.network.dto.AddonDto
+import com.marmitaria.marmitaria_do_dia.data.network.dto.DeliveryZoneDto
+import com.marmitaria.marmitaria_do_dia.data.network.dto.DeliveryZoneResponseDto
+import com.marmitaria.marmitaria_do_dia.data.network.dto.DrinkDto
+import com.marmitaria.marmitaria_do_dia.data.network.dto.MealOptionDto
+import com.marmitaria.marmitaria_do_dia.data.network.dto.OrderRequestDto
+import com.marmitaria.marmitaria_do_dia.data.network.dto.OrderResponseDto
+import com.marmitaria.marmitaria_do_dia.data.network.dto.SettingsDto
+import com.marmitaria.marmitaria_do_dia.data.network.dto.TodayMenuDto
 
 object MenuRepository {
 
@@ -112,4 +125,82 @@ object MenuRepository {
             )
         )
     )
+
+    // Conversões de DTO para Modelo de Domínio
+    fun MealOptionDto.toDomain(): MealOption = MealOption(
+        id = id ?: "",
+        num = num ?: "",
+        name = name ?: "",
+        accompaniments = accompaniments ?: "",
+        price = price ?: 27.00
+    )
+
+    fun DrinkDto.toDomain(): Drink = Drink(
+        id = id ?: "",
+        name = name ?: "",
+        desc = desc ?: "",
+        price = price ?: 0.0
+    )
+
+    fun AddonDto.toDomain(): Addon = Addon(
+        id = id ?: "",
+        name = name ?: "",
+        price = price ?: 0.0
+    )
+
+    // Chamadas da API com tratamento via runCatching / Result
+    suspend fun fetchTodayMenu(apiService: MarmitariaApiService = RetrofitClient.apiService): Result<TodayMenuDto> = runCatching {
+        apiService.getTodayMenu()
+    }
+
+    suspend fun fetchWeeklyMenu(apiService: MarmitariaApiService = RetrofitClient.apiService): Result<Map<String, DayMenu>> = runCatching {
+        val dto = apiService.getWeeklyMenu()
+        val result = mutableMapOf<String, DayMenu>()
+
+        dto.weeklySchedule?.forEach { dayDto ->
+            val dayName = dayDto.dayName ?: return@forEach
+            result[dayName] = DayMenu(
+                dayName = dayName,
+                options = dayDto.options?.map { it.toDomain() } ?: emptyList()
+            )
+        }
+
+        dto.weeklyMenu?.forEach { (day, options) ->
+            result[day] = DayMenu(
+                dayName = day,
+                options = options.map { it.toDomain() }
+            )
+        }
+
+        if (result.isEmpty()) {
+            weeklyMenu
+        } else {
+            result
+        }
+    }
+
+    suspend fun fetchSettings(apiService: MarmitariaApiService = RetrofitClient.apiService): Result<SettingsDto> = runCatching {
+        apiService.getSettings()
+    }
+
+    suspend fun fetchDeliveryZones(apiService: MarmitariaApiService = RetrofitClient.apiService): Result<List<DeliveryZoneDto>> = runCatching {
+        val element = apiService.getDeliveryZones()
+        val gson = Gson()
+        if (element.isJsonObject) {
+            val responseObj = gson.fromJson(element, DeliveryZoneResponseDto::class.java)
+            responseObj.value ?: emptyList()
+        } else if (element.isJsonArray) {
+            val listType = object : TypeToken<List<DeliveryZoneDto>>() {}.type
+            gson.fromJson<List<DeliveryZoneDto>>(element, listType) ?: emptyList()
+        } else {
+            emptyList()
+        }
+    }
+
+    suspend fun createOrder(
+        orderRequest: OrderRequestDto,
+        apiService: MarmitariaApiService = RetrofitClient.apiService
+    ): Result<OrderResponseDto> = runCatching {
+        apiService.createOrder(orderRequest)
+    }
 }

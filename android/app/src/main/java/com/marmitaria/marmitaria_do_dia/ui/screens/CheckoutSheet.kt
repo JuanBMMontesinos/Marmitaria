@@ -41,7 +41,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.marmitaria.marmitaria_do_dia.data.model.DeliveryType
 import com.marmitaria.marmitaria_do_dia.data.model.PaymentMethod
-import com.marmitaria.marmitaria_do_dia.data.repository.MenuRepository
 import com.marmitaria.marmitaria_do_dia.ui.theme.BgCard
 import com.marmitaria.marmitaria_do_dia.ui.theme.BgPrimary
 import com.marmitaria.marmitaria_do_dia.ui.theme.BgSecondary
@@ -287,7 +286,7 @@ fun CheckoutSheet(
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
                             Text("🏪 Retirada no Balcão", color = PrimaryOrange, fontWeight = FontWeight.Bold, fontSize = 14.sp)
                             Text(
-                                "Endereço: ${MenuRepository.RESTAURANT_ADDRESS}\nDisponível a partir das ${MenuRepository.TAKEOUT_OPEN_TIME}.",
+                                "Endereço: ${uiState.restaurantAddress}\nDisponível a partir das ${uiState.takeoutOpenTime}.",
                                 color = TextMuted,
                                 fontSize = 11.sp,
                                 textAlign = TextAlign.Center,

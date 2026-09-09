@@ -22,6 +22,8 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -32,15 +34,12 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
-import com.marmitaria.marmitaria_do_dia.data.repository.MenuRepository
 import com.marmitaria.marmitaria_do_dia.ui.theme.BgCard
 import com.marmitaria.marmitaria_do_dia.ui.theme.BgPrimary
-import com.marmitaria.marmitaria_do_dia.ui.theme.BorderOrange
 import com.marmitaria.marmitaria_do_dia.ui.theme.PrimaryOrange
 import com.marmitaria.marmitaria_do_dia.ui.theme.TextDark
 import com.marmitaria.marmitaria_do_dia.ui.theme.TextGold
 import com.marmitaria.marmitaria_do_dia.ui.theme.TextMuted
-import com.marmitaria.marmitaria_do_dia.ui.theme.TextWhite
 import com.marmitaria.marmitaria_do_dia.ui.viewmodel.MenuViewModel
 
 @Composable
@@ -48,6 +47,8 @@ fun PixDialog(
     viewModel: MenuViewModel
 ) {
     val context = LocalContext.current
+    val uiState by viewModel.uiState.collectAsState()
+    val currentPixKey = uiState.pixKey
 
     Dialog(onDismissRequest = { viewModel.closePixDialog() }) {
         Card(
@@ -65,7 +66,7 @@ fun PixDialog(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
-                    text = "📱 Pague com PIX",
+                    text = if (uiState.lastOrderNumber != null) "📱 Pedido ${uiState.lastOrderNumber} - PIX" else "📱 Pague com PIX",
                     color = PrimaryOrange,
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Bold
@@ -102,7 +103,7 @@ fun PixDialog(
                             fontWeight = FontWeight.Bold
                         )
                         Text(
-                            text = "R$ Marmitaria",
+                            text = if (uiState.lastOrderNumber != null) "R$ ${uiState.lastOrderNumber}" else "R$ Marmitaria",
                             color = PrimaryOrange,
                             fontSize = 10.sp,
                             fontWeight = FontWeight.Bold
@@ -113,7 +114,7 @@ fun PixDialog(
                 Spacer(modifier = Modifier.height(16.dp))
 
                 Text(
-                    text = "Chave PIX (WhatsApp Oficial)",
+                    text = "Chave PIX (Oficial do Servidor)",
                     color = TextMuted,
                     fontSize = 11.sp,
                     modifier = Modifier.fillMaxWidth(),
@@ -133,7 +134,7 @@ fun PixDialog(
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Text(
-                        text = MenuRepository.PIX_KEY,
+                        text = currentPixKey,
                         color = TextGold,
                         fontWeight = FontWeight.Bold,
                         fontSize = 15.sp
@@ -142,7 +143,7 @@ fun PixDialog(
                     Button(
                         onClick = {
                             val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-                            val clip = ClipData.newPlainText("Chave PIX", MenuRepository.PIX_KEY)
+                            val clip = ClipData.newPlainText("Chave PIX", currentPixKey)
                             clipboard.setPrimaryClip(clip)
                             viewModel.showToast("Chave PIX copiada!")
                         },
