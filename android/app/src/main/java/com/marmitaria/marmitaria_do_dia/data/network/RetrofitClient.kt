@@ -8,8 +8,8 @@ import java.util.concurrent.TimeUnit
 
 object RetrofitClient {
 
-    // Base URL configurável (padrão: 10.0.2.2 na porta 3333 para emulador Android acessando localhost do host)
-    var BASE_URL = "http://10.0.2.2:3333/api/v1/"
+    // Base URL oficial da API em produção (Vercel)
+    var BASE_URL = "https://marmitex-backend.vercel.app/api/v1/"
 
     private val loggingInterceptor = HttpLoggingInterceptor().apply {
         level = HttpLoggingInterceptor.Level.BODY
